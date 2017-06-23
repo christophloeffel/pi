@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+  <head>
+ 
+    <meta charset="utf-8">
+    <title>Patterns of Pi</title>
+    <script src="d3\d3.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Sue+Ellen+Francisco" rel="stylesheet">
+ <style>
+.circleTxt{
+font-family: 'Sue Ellen Francisco', cursive;
+}
+.arcTxt {
+ pointer-events: none; 
+ font-family: 'Sue Ellen Francisco', cursive;
+}
+
+
+	  </style>
+  </head>
+  </head>
+  <body>
+ 
+
+    <script>
+var heightOfBar = 5; // Height of time-bar
+	var firstRing = 1; // Is it the first time ring is shown --> fade!
+	var w = window.innerWidth-8;
+	var h = window.innerHeight-8;
+	var svg = d3.select("body").append("svg")
+	.attr("width", w)
+	.attr("height", h);
+	var radiusCenter = h *0.15;
+	
+	var textSizeExplanation = radiusCenter/3.5 + "px";
+	var data = [];
+	var cx, cy;
+	
+	var circleColor = "red"; // Color of drawn circles
+var rawData;
+	var circles;
+	var rCircle = 10;
+	var yShift = rCircle * 2.5;
+	var xShift = rCircle * 2.5;
+	var row = 0;
+	var rowOld = 0;
+	var rowLength = Math.floor((w-rCircle)/xShift); 
+	var totalElements = rowLength * Math.floor(h/yShift);
+	var cScale = d3.scaleOrdinal()
+	
+	.domain(d3.range(10))
+	
+	.range(["#BFD8D2", "#0375B4", "#88D317", "#007849", "#FF3B3F", "#FBA100", "#FE65B7", "#94618E", "#49274A","#18121E"]);
+	
+	
+
+	
+
+	function drawCircles (){
+
+
+	// DRAW GREY CIRCLES
+	
+	
+	
+	cx = rCircle * 1.5; 
+	cy = rCircle * 1.5;
+	
+	
+	
+	
+	
+	
+
+	circles = svg.selectAll("circle").data(data);
+	circles.enter().append("circle");
+	circles.data(data)
+	.attr("fill", function(d,i){
+	
+		rowOld = row;
+		row = Math.floor(i/rowLength);
+		if (row > rowOld){
+			cx = rCircle *1.5;
+			cy = cy + yShift;
+		}
+	
+	d3.select(this).attr("cx", cx).attr("cy", cy).attr("r", 0).transition().duration(5000).ease(d3.easeElastic).attr("r", rCircle);
+	cx = cx  + xShift;
+	return circleColor; // Almost White when painting
+	});
+	// END of drawing circles
+	
+	
+	}
+	function load(){d3.csv("pi12.csv", function(d){d.a = + d.a; return d;},function(loadedData){	
+rawData = loadedData;
+for (i = 0; i < totalElements; i++) { 
+    data.push(rawData[i].a);
+	
+	}
+drawCircles();
+loadFinished();
+});
+
+
+}
+
+
+	
+	function drawGreyDots()
+	{
+	
+	
+	
+	
+	
+	
+	}
+	
+	
+	
+	function drawRing(){			
+for(i = 0; i<10; i++){
+	var arc = d3.arc().innerRadius(radiusCenter*0.82).outerRadius(radiusCenter).startAngle((i/5)*Math.PI).endAngle((i+1)/5 * Math.PI);
+
+svg.append("path").attr("id", (i+1)%10).attr("stroke", "none")
+.attr("opacity", 0.0)
+.attr("d", arc).attr("transform", "translate(" + w/2 +","+ h/2 + ")").attr("fill", function(){return cScale((i+1)%10);})
+
+.on("mouseover", function(d){
+
+	var currentID = +d3.select(this).attr("id");
+
+	circles.data(data).attr("fill", function(d){
+
+		if (d == currentID){
+	
+			return cScale(d);
+		}
+		else{
+			return "#EFEFEF";
+		}
+	});
+	
+	
+})
+.on("mouseout", function(d){
+
+	
+
+	circles.data(data).attr("fill", cScale);
+})
+
+.transition()
+.duration(function(){
+if (firstRing == 0){
+	
+console.log(firstRing);
+	return 0;
+}
+	else {return 3000;}
+}
+)
+.attr("opacity",0.75)
+	
+	
+	;
+	
+	
+	console.log(+(Math.PI*2*radiusCenter)/10/2) ;
+	
+	//ARC TEXT
+	
+	svg.append("text")
+	.attr("class", "arcTxt")
+	.attr("font-size", radiusCenter/6+"px")
+	.attr("x", (Math.PI*2*radiusCenter)/10/2)  //Move the text from the start angle of the arc
+	.attr("dy", radiusCenter*0.15) //Move the text down
+   .append("textPath") //append a textPath to the text element
+   .attr("class", "arcTxt")
+	.attr("xlink:href", "#" + (i+1)%10) //place the ID of the path here
+	.style("text-anchor","middle") //place the text halfway on the arc
+	.attr("startOffset", "0%")	
+
+	
+	.text((i+1)%10);
+
+	
+	
+	// END OF ARC TXT
+	
+}	
+firstRing = 0	
+}
+
+
+function started() {
+d3.selectAll(".circleTxt").remove(); // Delete Explanation Txt
+//Redraw Elements
+
+var centerCircle = svg.append("circle")
+	.attr("cx", w/2)
+	.attr("r", radiusCenter)
+	.attr("cy", h/2)
+	.attr("fill", "white")
+.attr("stroke","grey")
+	.attr("opacity", 0.75);	
+
+
+
+// End of redraw
+
+	
+	circles.data(data)
+	.transition()
+	.delay(0)
+	.duration(500)
+	.attr("fill", function(d){
+	return cScale(d);
+	});
+	
+//Center Circle
+
+centerCircle = svg.append("circle")
+	.attr("cx", w/2)
+	.attr("cy", h/2)
+	.attr("r", radiusCenter)
+	.attr("fill", "white")
+.attr("stroke","grey")
+	.attr("opacity", 0.75);	
+
+
+svg.append("text")
+.attr("class", "circleTxt")
+        .attr("x", w/2)
+		.attr("y", h/2+radiusCenter/4)
+		.attr("text-anchor", "middle")
+        .text("π")
+		.attr("font-size", radiusCenter+"px")
+		.attr("fill", "black")
+		.attr("opacity", 0)
+	.transition()
+	.duration(600)
+	.delay(500)
+	.attr("opacity", 0.9);
+
+		
+		
+drawRing();		
+		
+		
+		
+		
+
+}
+load();
+	
+function loadFinished(){
+
+
+svg.append("circle")
+	.attr("cx", w/2)
+	.attr("cy", h/2)
+	.attr("r", radiusCenter)
+	.attr("fill", "white")
+	.attr("stroke","grey")
+
+	.attr("opacity", 0.75);
+svg.append("text")
+.attr("class", "circleTxt")
+        .attr("x", w/2)
+		.attr("y", h/2+radiusCenter/5)
+		.attr("text-anchor", "middle")
+        .text("Start")
+		.attr("font-size", radiusCenter/1.5+"px")
+		.attr("fill", "black")
+		
+	.attr("opacity", 0.9)
+	.on("click", function(){
+	
+	circleColor = "#EFEFEF";
+	drawCircles();
+	
+	
+	
+	d3.select("text").remove();
+	
+	
+	// Anleitung hier##########################
+// BAR
+svg.append("rect")
+.attr("id", "bar1")
+	.attr("fill", "#EFEFEF")
+	.attr("stroke", "grey")
+	.attr("x", w/2-radiusCenter/6)
+	.attr("y", h/2+ h*0.1)
+	.attr("height", heightOfBar)
+	.attr("width", radiusCenter/3)
+svg.append("rect")
+.attr("id", "bar2")
+	.attr("fill", "grey")
+	.attr("x", w/2-radiusCenter/6)
+	.attr("y", h/2 + h*0.1)
+	.attr("height", heightOfBar)
+	.attr("width", 0)
+	.transition()
+	.duration(3000)
+	.ease(d3.easeLinear)
+	.attr("width", radiusCenter/3);
+
+// END BAR
+	
+	svg.append("text")
+	.attr("id", "txtBox2")
+	.attr("class", "circleTxt")
+        .attr("x", w/2)
+		.attr("y", h/2+radiusCenter/10)
+		.attr("text-anchor", "middle")
+        .text("represents one digit")
+		
+		.attr("font-size", textSizeExplanation)
+		.attr("fill", "black");
+		
+		svg.append("text")
+	.attr("id", "txtBox3")
+	.attr("class", "circleTxt")
+        .attr("x", w/2)
+		.attr("y", h/2+radiusCenter/2)
+		.attr("text-anchor", "middle")
+        .text("of Pi")
+		
+		.attr("font-size", textSizeExplanation)
+		.attr("fill", "black");
+		
+		
+	svg.append("text")
+	.attr("id", "txtBox1")
+	.attr("class", "circleTxt")
+        .attr("x", w/2)
+		.attr("y", h/2-radiusCenter/2+radiusCenter/10)
+		.attr("text-anchor", "middle")
+        .text("Each circle")
+		
+		.attr("font-size", textSizeExplanation)
+		.attr("fill", "black")
+		.transition()
+		.delay(3000)
+		.attr("opacity", 1)
+		.on("end",function(){
+		
+		
+		
+		
+		
+drawRing();		
+		
+		
+		
+		
+		
+		
+		
+		
+		d3.select("#txtBox1").text("Hover over");
+		//Replace Old TEXT
+		d3.select("#txtBox2").text("numbers to explore");
+		d3.select("#txtBox3").text("patterns");
+		d3.select("#bar2").attr("width", 0).transition()
+	.duration(3000)
+	.ease(d3.easeLinear)
+	.attr("width", radiusCenter/3)
+	.on("end",function(){
+	
+	
+	started();
+	
+	});
+		
+		
+		
+		
+		});
+	
+	
+	
+	
+	
+	
+	
+	// Anleitung ENDE #######################
+	});	
+	
+	
+	}
+    </script>
+  </body>
+</html>
