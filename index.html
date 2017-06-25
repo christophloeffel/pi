@@ -196,6 +196,8 @@ firstRing = 0
 
 function started() {
 d3.selectAll(".circleTxt").remove(); // Delete Explanation Txt
+d3.selectAll("#bar1").remove(); // Delete Bars
+d3.selectAll("#bar2").remove(); 
 //Redraw Elements
 
 var centerCircle = svg.append("circle")
